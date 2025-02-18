@@ -37,7 +37,6 @@ import useSignOut from "react-auth-kit/hooks/useSignOut";
 import Cookies from "universal-cookie";
 
 const queryParameters = new URLSearchParams(window.location.search);
-let parsedTeamNum = "";
 
 function App() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
