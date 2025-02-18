@@ -1,6 +1,7 @@
 import UserNameAvatar from "../UsrNameAvatar";
 import {
-  Avatar,
+  Accordion,
+  AccordionItem,
   Button,
   Divider,
   Modal,
@@ -8,17 +9,13 @@ import {
 } from "@nextui-org/react";
 import Tune from "@mui/icons-material/Tune";
 import GroupAdd from "@mui/icons-material/GroupAdd";
-import { SliderValueLabel, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
 import ModalIconButton from "../ModalIconButton";
 import NameHeader from "../NameHeader";
 import TeamTable from "../TeamTable";
 import ModalButton from "../ModalButton";
 import { TagInput } from "../TagInput";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "../ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import {
   ModalContent,
   ModalHeader,
@@ -28,7 +25,6 @@ import {
 import TeamStats from "../TeamStats";
 import TeamName from "../TeamName";
 import { useState } from "react";
-import React from "react";
 import MobileAccountModal from "../MobileAccountModal";
 import FileUploader from "../FileUploader";
 import { toast } from "sonner";
@@ -37,9 +33,8 @@ import axios from "axios";
 import { useDisclosure } from "@nextui-org/react";
 import SaveTeamButton from "../SaveTeamButton";
 import TableSelector from "../TableSelector";
-import useSignOut from 'react-auth-kit/hooks/useSignOut';
-import Cookies from 'universal-cookie';
-
+import useSignOut from "react-auth-kit/hooks/useSignOut";
+import Cookies from "universal-cookie";
 
 const queryParameters = new URLSearchParams(window.location.search);
 let parsedTeamNum = "";
@@ -48,7 +43,6 @@ function App() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const signOut = useSignOut();
   const cookies = new Cookies();
-
 
   const [teamStats, setTeamStats] = useState({
     epa: 0,
@@ -147,8 +141,7 @@ function App() {
           "team-id": id,
         },
       });
-      setTeamData((prevTeamData) => ({
-        ...prevTeamData,
+      setTeamData({
         id: res.data.id,
         teamNum: res.data.teamNum,
         ab1: res.data.ab1,
@@ -158,7 +151,7 @@ function App() {
         weaknesses: JSON.parse(res.data.weaknesses),
         botImage: res.data.botImage,
         institution: res.data.institution,
-      }));
+      });
       onOpen();
 
       setTeamStats((prevTeamData) => ({
@@ -171,14 +164,14 @@ function App() {
 
       const statRes = await axios.get(
         "https://api.statbotics.io/v3/team_event/" +
-        res.data.teamNum +
-        "/" +
-        queryParameters.get("eventname")
+          res.data.teamNum +
+          "/" +
+          queryParameters.get("eventname")
       );
 
       setTeamStats((prevTeamData) => ({
         ...prevTeamData,
-        epa: statRes.data.epa.breakdown.total_points.mean,
+        epa: statRes.data.epa.breakdown.total_points,
         rank: statRes.data.record.qual.rank,
         wins: statRes.data.record.qual.wins,
         losses: statRes.data.record.qual.losses,
@@ -190,8 +183,7 @@ function App() {
     }
   }
 
-  function eventChanger(key: string) {
-    console.log(key.target.value);
+  function eventChanger(key: React.ChangeEvent<HTMLSelectElement>) {
     queryParameters.set("eventname", key.target.value);
     window.history.replaceState(null, "", "?" + queryParameters.toString());
     window.location.reload();
@@ -215,18 +207,52 @@ function App() {
                 <ModalContent>
                   {(onClose) => (
                     <>
-                      <ModalHeader className="flex flex-col gap-1 text-5xl">
+                      <ModalHeader className="flex flex-col gap-1 text-4xl">
                         Settings
                       </ModalHeader>
-                      <ModalBody>
-                        <TableSelector eventChanger={eventChanger} />
+                      <ModalBody className="flex flex-col gap-2">
+                        <TableSelector
+                          eventChanger={(
+                            e: React.ChangeEvent<HTMLSelectElement>
+                          ) => {
+                            eventChanger(e);
+                          }}
+                        />
+                        <Accordion isCompact>
+                          <AccordionItem
+                            key="1"
+                            aria-label="Ability 1"
+                            title="Ability 1"
+                            className="text-sm"
+                          >
+                            {"blah blah blah blah blah blah."}
+                          </AccordionItem>
+                          <AccordionItem
+                            key="2"
+                            aria-label="Ability 2"
+                            title="Ability 2"
+                            className="text-sm"
+                          >
+                            {"blah blah blah blah blah blah."}
+                          </AccordionItem>
+                          <AccordionItem
+                            key="3"
+                            aria-label="Ability 3"
+                            title="Ability 3"
+                            className="text-sm"
+                          >
+                            {"blah blah blah blah blah blah."}
+                          </AccordionItem>
+                        </Accordion>
                       </ModalBody>
                       <ModalFooter>
-                        <Button color="danger" onPress={() => {
-                          signOut();
-                          window.location.reload();
-                        }
-                        }>
+                        <Button
+                          color="danger"
+                          onPress={() => {
+                            signOut();
+                            window.location.reload();
+                          }}
+                        >
                           Log Out
                         </Button>
                         <Button color="default" onPress={onClose}>
@@ -239,7 +265,7 @@ function App() {
               </ModalIconButton>
             </div>
           </div>
-        </div >
+        </div>
       );
     } else {
       return <div className="bg-[#262626] pe-4"></div>;
@@ -252,22 +278,20 @@ function App() {
     if (desktopView) {
       return <NameHeader>{cookies.get("_auth_state").name}</NameHeader>;
     } else {
-      return (
-        <MobileAccountModal avatarURL="https://media.npr.org/assets/img/2021/11/16/gettyimages-1235223332_sq-e88ad790d447bd7dfcb0c1571047db26d39a8ee0.jpg" />
-      );
+      return <MobileAccountModal />;
     }
   };
 
   const handleComplete = (otpValue: string) => {
-    parsedTeamNum = otpValue.startsWith("0")
+    let parsedOtpValue = otpValue.startsWith("0")
       ? otpValue.toString().substring(1)
       : otpValue;
-    console.log("This is the parsed ver: " + parsedTeamNum);
+    console.log("This is the parsed ver: " + parsedOtpValue);
     fetch(
       "https://api.statbotics.io/v3/team_event/" +
-      parsedTeamNum +
-      "/" +
-      queryParameters.get("eventname")
+        parsedOtpValue +
+        "/" +
+        queryParameters.get("eventname")
     )
       .then((response) => {
         if (!response.ok) {
@@ -275,28 +299,27 @@ function App() {
         }
         return response.json();
       })
-      .then((data) => {
+      .then((data) =>
         setTeamStats({
-          epa: data.epa.breakdown.total_points.mean,
+          ...data,
+          epa: data.epa.breakdown.total_points,
           rank: data.record.qual.rank,
           wins: data.record.qual.wins,
           losses: data.record.qual.losses,
           teamName: data.team_name,
-          teamNumber: data.team,
-        });
-
-        setTeamData((prevTeamData) => ({
-          ...prevTeamData,
-          teamNum: parsedTeamNum,
-          institution: data.team_name,
-        }));
-      })
+        })
+      )
       .catch((error) => {
         toast.error(error + " Invalid Team Name!");
       });
+
+    setTeamData((prevTeamData) => ({
+      ...prevTeamData,
+      teamNum: parsedOtpValue,
+    }));
   };
   return (
-    <div className="flex h-screen font-sans block">
+    <div className="flex h-screen font-sans">
       {sideBar()}
       <div className=" bg-[#262626] w-full pr-4 pt-4 pb-4 ">
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="xl">
@@ -309,11 +332,7 @@ function App() {
                     <InputOTP
                       maxLength={4}
                       onComplete={handleComplete}
-                      value={
-                        teamStats.teamNumber == ""
-                          ? "0000"
-                          : teamStats.teamNumber
-                      }
+                      value={`${teamData.teamNum}`}
                     >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
@@ -347,7 +366,9 @@ function App() {
                       minValue={0}
                       value={teamData.ab1 == -1 ? 0 : teamData.ab1}
                       getValue={(abilityValue) => `${abilityValue}/10`}
-                      onChange={(value) => handleAb1Change(value)}
+                      onChange={(value: number | number[]) =>
+                        handleAb1Change(Array.isArray(value) ? value[0] : value)
+                      }
                     />
                     <Slider
                       size="sm"
@@ -359,7 +380,9 @@ function App() {
                       minValue={0}
                       value={teamData.ab2 == -1 ? 0 : teamData.ab2}
                       getValue={(abilityValue) => `${abilityValue}/10`}
-                      onChange={(value) => handleAb2Change(value)}
+                      onChange={(value: number | number[]) =>
+                        handleAb2Change(Array.isArray(value) ? value[0] : value)
+                      }
                     />
                     <Slider
                       size="sm"
@@ -371,7 +394,9 @@ function App() {
                       minValue={0}
                       value={teamData.ab3 == -1 ? 0 : teamData.ab3}
                       getValue={(abilityValue) => `${abilityValue}/10`}
-                      onChange={(value) => handleAb3Change(value)}
+                      onChange={(value: number | number[]) =>
+                        handleAb3Change(Array.isArray(value) ? value[0] : value)
+                      }
                     />
                   </div>
                   <Divider className="my-3" />
@@ -451,7 +476,11 @@ function App() {
                           minValue={0}
                           defaultValue={0}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb1Change(value)}
+                          onChange={(value: number | number[]) =>
+                            handleAb1Change(
+                              Array.isArray(value) ? value[0] : value
+                            )
+                          }
                         />
                         <Slider
                           size="sm"
@@ -463,7 +492,11 @@ function App() {
                           minValue={0}
                           defaultValue={0}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb2Change(value)}
+                          onChange={(value: number | number[]) =>
+                            handleAb2Change(
+                              Array.isArray(value) ? value[0] : value
+                            )
+                          }
                         />
                         <Slider
                           size="sm"
@@ -475,7 +508,11 @@ function App() {
                           minValue={0}
                           defaultValue={0}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb3Change(value)}
+                          onChange={(value: number | number[]) =>
+                            handleAb3Change(
+                              Array.isArray(value) ? value[0] : value
+                            )
+                          }
                         />
                       </div>
                       <Divider className="my-3" />

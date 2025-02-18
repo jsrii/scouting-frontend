@@ -44,7 +44,7 @@ export const TagInput = ({
           <>
             <TagsInput.Label className="mb-4">{inputLabel}</TagsInput.Label>
             <TagsInput.Control className="border p-4 rounded-lg flex flex-col focus-within:border-black focus-within:ring-2 focus-within:ring-black">
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mb-2 flex-wrap">
                 {tags.map((value, index) => (
                   <TagsInput.Item
                     className=""

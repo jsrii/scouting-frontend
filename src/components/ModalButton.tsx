@@ -1,5 +1,5 @@
 import { Modal, Button, useDisclosure } from "@nextui-org/react";
-import { Children, ReactNode } from "react";
+import { ReactNode } from "react";
 
 interface ModalButtonProps {
   icon: ReactNode;

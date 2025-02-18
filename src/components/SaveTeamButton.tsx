@@ -10,6 +10,7 @@ interface CreateTeamButtonProps {
 const queryParameters = new URLSearchParams(window.location.search);
 
 const updateTeam = async (data: object) => {
+  console.log(data);
   try {
     const res = await axios.post("http://192.168.1.40:7777/updateteam", {
       headers: {

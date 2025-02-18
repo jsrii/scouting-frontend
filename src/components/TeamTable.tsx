@@ -32,6 +32,19 @@ interface TeamTableProps {
   editFunction: Function;
 }
 
+type TableRow = {
+  id: number;
+  teamNum: number;
+  ab1: number;
+  ab2: number;
+  ab3: number;
+  strengths: string;
+  weaknesses: string;
+  botImage: string;
+  institution: string;
+  userName: string | null;
+};
+
 export default function App({ deleteFunction, editFunction }: TeamTableProps) {
   const queryParameters = new URLSearchParams(window.location.search);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -42,7 +55,7 @@ export default function App({ deleteFunction, editFunction }: TeamTableProps) {
         signal,
         mode: "cors",
         headers: {
-          "Event-Name": queryParameters.get("eventname"),
+          "Event-Name": queryParameters.get("eventname") ?? "",
           "Api-Key": "97feee36-7fd0-46ab-a80e-8b8e24fc7a2e",
         },
       });
@@ -56,7 +69,7 @@ export default function App({ deleteFunction, editFunction }: TeamTableProps) {
     },
     async sort({ items, sortDescriptor }) {
       return {
-        items: items.sort((a, b) => {
+        items: items.sort((a : any, b : any) => {
           let first = a[sortDescriptor.column];
           let second = b[sortDescriptor.column];
           let cmp =
@@ -78,12 +91,12 @@ export default function App({ deleteFunction, editFunction }: TeamTableProps) {
     } else {
       return (
         <TableBody
-          items={list.items}
+          items={list.items as TableRow[]} // Cast items to TableRow[]
           isLoading={isLoading}
           loadingContent={<Spinner label="Loading..." />}
         >
-          {(item) => (
-            <TableRow key={item.name}>
+          {(item: TableRow) => (
+            <TableRow key={item.id}>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}
@@ -93,9 +106,10 @@ export default function App({ deleteFunction, editFunction }: TeamTableProps) {
       );
     }
   }
+  
 
   const renderCell = React.useCallback(
-    (item: (typeof list.items)[0], columnKey: React.Key) => {
+    (item: TableRow, columnKey: React.Key) => {
       const cellValue = item[columnKey as keyof typeof item];
 
       switch (columnKey) {
@@ -117,9 +131,9 @@ export default function App({ deleteFunction, editFunction }: TeamTableProps) {
               hideScrollBar
             >
               <div className="flex gap-1">
-                {JSON.parse(item.strengths).map((strength, index) => (
+                {JSON.parse(item.strengths).map((strength : JSON[], index: number) => (
                   <Chip key={index} color="default">
-                    {strength}
+                    {`${strength}`}
                   </Chip>
                 ))}
               </div>
@@ -133,9 +147,9 @@ export default function App({ deleteFunction, editFunction }: TeamTableProps) {
               hideScrollBar
             >
               <div className="flex gap-1">
-                {JSON.parse(item.weaknesses).map((weaknesses, index) => (
+                {JSON.parse(item.weaknesses).map((weaknesses: JSON[], index: number) => (
                   <Chip key={index} color="default">
-                    {weaknesses}
+                    {`${weaknesses}`}
                   </Chip>
                 ))}
               </div>

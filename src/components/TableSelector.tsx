@@ -8,7 +8,11 @@ interface TableSelectorProps {
 }
 
 function TableSelector({ eventChanger }: TableSelectorProps) {
-  const [tableArray, setTableArray] = useState([""]);
+  type dbQuery = {
+    "Tables_in_scouting_db (2%)": string;
+  };
+  const [tableArray, setTableArray] = useState<dbQuery[]>([]);
+  const queryParameters = new URLSearchParams(window.location.search);
 
   useEffect(() => {
     fetchTables();
@@ -33,6 +37,7 @@ function TableSelector({ eventChanger }: TableSelectorProps) {
       <Select
         label="Select an event"
         className="max-w-xs"
+        defaultSelectedKeys={[queryParameters.get("eventname") ?? ""]}
         onChange={(value) => eventChanger(value)}
       >
         {tableArray.map((events) => (

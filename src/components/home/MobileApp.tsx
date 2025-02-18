@@ -1,25 +1,17 @@
 import {
-  Avatar,
   Button,
   Divider,
   Modal,
   Slider,
-  SliderValue,
   useDisclosure,
 } from "@nextui-org/react";
 import GroupAdd from "@mui/icons-material/GroupAdd";
 import { useMediaQuery } from "@mui/material";
-import ModalIconButton from "../ModalIconButton";
 import NameHeader from "../NameHeader";
-import TableDisplay from "../TableDisplay";
 import TeamTable from "../TeamTable";
 import ModalButton from "../ModalButton";
 import { TagInput } from "../TagInput";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "../ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import {
   ModalContent,
   ModalHeader,
@@ -28,8 +20,7 @@ import {
 } from "@nextui-org/react";
 import TeamStats from "../TeamStats";
 import TeamName from "../TeamName";
-import { useEffect, useState } from "react";
-import React from "react";
+import { useState } from "react";
 import MobileAccountModal from "../MobileAccountModal";
 import FileUploader from "../FileUploader";
 import { toast } from "sonner";
@@ -38,7 +29,6 @@ import SaveTeamButton from "../SaveTeamButton";
 import CreateTeamButton from "../CreateTeamButton";
 
 const queryParameters = new URLSearchParams(window.location.search);
-let parsedOtpValue = "";
 
 function App() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -127,7 +117,6 @@ function App() {
 
   function editTeam(id: number) {
     editModal(id);
-    toast.success("Modal is: " + isOpen);
   }
 
   async function editModal(id: number) {
@@ -139,10 +128,10 @@ function App() {
           "team-id": id,
         },
       });
-      setTeamData((prevTeamData) => ({
-        ...prevTeamData,
+
+      setTeamData({
         id: res.data.id,
-        teamNum: res.data.teamNum,
+        teamNum: `${res.data.teamNum}`,
         ab1: res.data.ab1,
         ab2: res.data.ab2,
         ab3: res.data.ab3,
@@ -150,32 +139,33 @@ function App() {
         weaknesses: JSON.parse(res.data.weaknesses),
         botImage: res.data.botImage,
         institution: res.data.institution,
-      }));
+      });
       onOpen();
+      console.log(res.data);
 
       setTeamStats((prevTeamData) => ({
         ...prevTeamData,
         teamName: res.data.institution,
-        teamNumber: res.data.teamNum,
+        teamNumber: `${res.data.teamNum}`,
       }));
 
       toast.success("Successfully got Team!");
 
       const statRes = await axios.get(
         "https://api.statbotics.io/v3/team_event/" +
-        res.data.teamNum +
-        "/" +
-        queryParameters.get("eventname")
+          res.data.teamNum +
+          "/" +
+          queryParameters.get("eventname")
       );
 
       setTeamStats((prevTeamData) => ({
         ...prevTeamData,
-        epa: statRes.data.epa.breakdown.total_points.mean,
+        epa: statRes.data.epa.breakdown.total_points,
         rank: statRes.data.record.qual.rank,
         wins: statRes.data.record.qual.wins,
         losses: statRes.data.record.qual.losses,
         teamName: statRes.data.team_name,
-        teamNumber: statRes.data.team,
+        teamNumber: `${statRes.data.team}`,
       }));
     } catch (error) {
       toast.error("Error getting Team: " + error);
@@ -188,22 +178,20 @@ function App() {
     if (desktopView) {
       return <NameHeader>Jas Sri</NameHeader>;
     } else {
-      return (
-        <MobileAccountModal />
-      );
+      return <MobileAccountModal />;
     }
   };
 
   const handleComplete = (otpValue: string) => {
-    parsedOtpValue = otpValue.startsWith("0")
+    let parsedOtpValue = otpValue.startsWith("0")
       ? otpValue.toString().substring(1)
       : otpValue;
     console.log("This is the parsed ver: " + parsedOtpValue);
     fetch(
       "https://api.statbotics.io/v3/team_event/" +
-      parsedOtpValue +
-      "/" +
-      queryParameters.get("eventname")
+        parsedOtpValue +
+        "/" +
+        queryParameters.get("eventname")
     )
       .then((response) => {
         if (!response.ok) {
@@ -211,14 +199,16 @@ function App() {
         }
         return response.json();
       })
-      .then((data) => setTeamStats({
-        ...data,
-        epa: data.epa.breakdown.total_points.mean,
-        rank: data.record.qual.rank,
-        wins: data.record.qual.wins,
-        losses: data.record.qual.losses,
-        teamName: data.team_name,
-      }))
+      .then((data) =>
+        setTeamStats({
+          ...data,
+          epa: data.epa.breakdown.total_points,
+          rank: data.record.qual.rank,
+          wins: data.record.qual.wins,
+          losses: data.record.qual.losses,
+          teamName: data.team_name,
+        })
+      )
       .catch((error) => {
         toast.error(error + " Invalid Team Name!");
       });
@@ -245,9 +235,7 @@ function App() {
                           maxLength={4}
                           onComplete={handleComplete}
                           value={
-                            teamStats.teamNumber == ""
-                              ? "0000"
-                              : teamStats.teamNumber
+                            teamData.teamNum == "" ? "0000" : teamData.teamNum
                           }
                         >
                           <InputOTPGroup>
@@ -282,7 +270,7 @@ function App() {
                           minValue={0}
                           value={teamData.ab1 == -1 ? 0 : teamData.ab1}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb1Change(value)}
+                          onChange={(value: number | number[]) => handleAb1Change(Array.isArray(value) ? value[0] : value)}                    
                         />
                         <Slider
                           size="sm"
@@ -294,7 +282,7 @@ function App() {
                           minValue={0}
                           value={teamData.ab2 == -1 ? 0 : teamData.ab2}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb2Change(value)}
+                          onChange={(value: number | number[]) => handleAb2Change(Array.isArray(value) ? value[0] : value)}                    
                         />
                         <Slider
                           size="sm"
@@ -306,7 +294,7 @@ function App() {
                           minValue={0}
                           value={teamData.ab3 == -1 ? 0 : teamData.ab3}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb3Change(value)}
+                          onChange={(value: number | number[]) => handleAb3Change(Array.isArray(value) ? value[0] : value)}                    
                         />
                       </div>
                       <Divider className="my-3" />
@@ -337,7 +325,10 @@ function App() {
                       <Button color="danger" variant="light" onPress={onClose}>
                         Close
                       </Button>
-                      <SaveTeamButton onPressFunction={onClose} data={teamData} />
+                      <SaveTeamButton
+                        onPressFunction={onClose}
+                        data={teamData}
+                      />
                     </ModalFooter>
                   </>
                 )}
@@ -383,7 +374,7 @@ function App() {
                           minValue={0}
                           defaultValue={0}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb1Change(value)}
+                          onChange={(value: number | number[]) => handleAb1Change(Array.isArray(value) ? value[0] : value)}                    
                         />
                         <Slider
                           size="sm"
@@ -395,7 +386,7 @@ function App() {
                           minValue={0}
                           defaultValue={0}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb2Change(value)}
+                          onChange={(value: number | number[]) => handleAb2Change(Array.isArray(value) ? value[0] : value)}                    
                         />
                         <Slider
                           size="sm"
@@ -407,27 +398,30 @@ function App() {
                           minValue={0}
                           defaultValue={0}
                           getValue={(abilityValue) => `${abilityValue}/10`}
-                          onChange={(value) => handleAb3Change(value)}
+                          onChange={(value: number | number[]) => handleAb3Change(Array.isArray(value) ? value[0] : value)}                    
                         />
                       </div>
                       <Divider className="my-3" />
                       <div className="flex gap-3">
                         <div className="flex flex-col w-4/6 gap-2">
-                          <TagInput
+                        <TagInput
                             inputLabel={"Strengths"}
                             inputPlaceholder={"Add Strength"}
                             onTagsChange={handleStrengthTagsChange}
+                            loadTags={[]}
                           />
                           <TagInput
                             inputLabel={"Weaknesses"}
                             inputPlaceholder={"Add Weakness"}
                             onTagsChange={handleWeaknessTagsChange}
+                            loadTags={[]}
                           />
                         </div>
-                        <div className="flex flex-col w-2/6">
-                          <div className="flex flex-col w-2/6 fileUP">
-                            <FileUploader imageUrl="" handleBotImageURL={handleBotImageURl} />
-                          </div>
+                        <div className="flex flex-col w-2/6 fileUP">
+                          <FileUploader
+                            imageUrl=""
+                            handleBotImageURL={handleBotImageURl}
+                          />
                         </div>
                       </div>
                     </ModalBody>
@@ -445,7 +439,6 @@ function App() {
               </ModalContent>
             </ModalButton>
           </div>
-          {/* <TableDisplay /> */}
           <TeamTable deleteFunction={deleteTeam} editFunction={editTeam} />
         </div>
       </div>

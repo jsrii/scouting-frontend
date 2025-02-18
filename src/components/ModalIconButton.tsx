@@ -1,13 +1,9 @@
 import {
   Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
   useDisclosure,
 } from "@nextui-org/react";
-import { Children, ReactNode } from "react";
+import { ReactNode } from "react";
 
 interface ModalButtonProps {
   gradientStart: string;
@@ -18,8 +14,6 @@ interface ModalButtonProps {
 
 export default function ModalButton({
   children,
-  gradientStart,
-  gradientEnd,
   iconName,
 }: ModalButtonProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -37,7 +31,7 @@ export default function ModalButton({
       >
         {iconName}
       </Button>
-      <Modal size="xl" isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal size="lg" isOpen={isOpen} onOpenChange={onOpenChange}>
         {children}
       </Modal>
     </>
