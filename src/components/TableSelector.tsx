@@ -20,9 +20,9 @@ function TableSelector({ eventChanger }: TableSelectorProps) {
 
   async function fetchTables() {
     try {
-      const res = await axios.get("http://192.168.1.40:7777/getevents", {
+      const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/getevents`, {
         headers: {
-          "api-key": "97feee36-7fd0-46ab-a80e-8b8e24fc7a2e",
+          "api-key": `${import.meta.env.VITE_BACKEND_API_KEY}`,
         },
       });
       console.log(res.data);

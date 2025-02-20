@@ -51,12 +51,12 @@ export default function App({ deleteFunction, editFunction }: TeamTableProps) {
 
   let list = useAsyncList({
     async load({ signal }) {
-      let res = await fetch("http://192.168.1.40:7777/getteams", {
+      let res = await fetch(`${import.meta.env.VITE_SERVER_URL}/getteams`, {
         signal,
         mode: "cors",
         headers: {
           "Event-Name": queryParameters.get("eventname") ?? "",
-          "Api-Key": "97feee36-7fd0-46ab-a80e-8b8e24fc7a2e",
+          "Api-Key": `${import.meta.env.VITE_BACKEND_API_KEY}`,
         },
       });
 

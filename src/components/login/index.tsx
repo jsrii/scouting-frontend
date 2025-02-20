@@ -10,9 +10,11 @@ function Login() {
   const navigate = useNavigate();
 
   const submitData = async (values: any) => {
+    console.log();
+    
     try {
       const response = await axios.post(
-        "http://192.168.1.40:7777/login",
+        `${import.meta.env.VITE_SERVER_URL}/login`,
         values
       );
       signIn({

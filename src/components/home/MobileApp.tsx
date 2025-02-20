@@ -100,10 +100,10 @@ function App() {
 
   async function deleteTeam(id: number) {
     try {
-      const res = await axios.get("http://192.168.1.40:7777/deleteteam", {
+      const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/deleteteam`, {
         headers: {
           "event-name": queryParameters.get("eventname"),
-          "api-key": "97feee36-7fd0-46ab-a80e-8b8e24fc7a2e",
+          "api-key": `${import.meta.env.VITE_BACKEND_API_KEY}`,
           "entry-to-delete": id,
         },
       });
@@ -121,10 +121,10 @@ function App() {
 
   async function editModal(id: number) {
     try {
-      const res = await axios.get("http://192.168.1.40:7777/getteam", {
+      const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/getteam`, {
         headers: {
           "event-name": queryParameters.get("eventname"),
-          "api-key": "97feee36-7fd0-46ab-a80e-8b8e24fc7a2e",
+          "api-key": `${import.meta.env.VITE_BACKEND_API_KEY}`,
           "team-id": id,
         },
       });

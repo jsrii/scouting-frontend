@@ -12,10 +12,10 @@ const queryParameters = new URLSearchParams(window.location.search);
 const updateTeam = async (data: object) => {
   console.log(data);
   try {
-    const res = await axios.post("http://192.168.1.40:7777/updateteam", {
+    const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/updateteam`, {
       headers: {
         "event-name": queryParameters.get("eventname"),
-        "api-key": "97feee36-7fd0-46ab-a80e-8b8e24fc7a2e",
+        "api-key": `${import.meta.env.VITE_BACKEND_API_KEY}`,
       },
       body: data,
     });

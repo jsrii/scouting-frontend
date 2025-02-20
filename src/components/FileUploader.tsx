@@ -1,11 +1,10 @@
 import Add from "@mui/icons-material/Add";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Button } from "@nextui-org/react";
 import Fullscreen from "@mui/icons-material/Fullscreen";
-
-
+import FsLightbox from "fslightbox-react";
 interface FileUploaderProps {
   imageUrl: string;
   handleBotImageURL: Function;
@@ -17,6 +16,7 @@ export default function FileUploader({
 }: FileUploaderProps) {
   const [botImage, setBotImage] = useState<string>("");
   const hiddenFileInput = useRef<HTMLInputElement>(null);
+  const [toggler, setToggler] = useState(false);
 
   useEffect(() => {
     if (imageUrl) {
@@ -24,8 +24,7 @@ export default function FileUploader({
     }
   }, [imageUrl]);
 
-  const handleClick = (event: { preventDefault: () => void }) => {
-    event.preventDefault();
+  const handleClick = () => {
     hiddenFileInput.current?.click();
   };
 
@@ -36,7 +35,7 @@ export default function FileUploader({
 
       try {
         const res = await axios.post(
-          "http://192.168.1.40:7777/botimage",
+          `${import.meta.env.VITE_SERVER_URL}/botimage`,
           data,
           {
             headers: {
@@ -63,13 +62,35 @@ export default function FileUploader({
             className="object-cover rounded-md"
           />
           <div className="absolute bottom-0 left-0 w-full px-1 pb-1 flex gap-1">
-            <Button color="default" className="backdrop-blur p-1 grow">
+            <Button
+              color="default"
+              variant="light"
+              className="backdrop-blur text-white p-1 grow"
+              onPress={handleClick}
+            >
               Swap
             </Button>
-            <Button isIconOnly color="default" className="backdrop-blur p-1">
-            <Fullscreen/>
+            <Button
+              isIconOnly
+              color="default"
+              variant="light"
+              className="backdrop-blur text-white p-1"
+              onPress={() => {
+                setToggler(!toggler);
+                console.log(botImage);
+              }}
+            >
+              <Fullscreen />
             </Button>
+            <input
+              type="file"
+              ref={hiddenFileInput}
+              style={{ display: "none" }}
+              name="file"
+              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+            />
           </div>
+          <FsLightbox toggler={toggler} sources={[botImage]} exitFullscreenOnClose/>
         </div>
       );
     } else {
